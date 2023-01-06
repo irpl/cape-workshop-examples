@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      canvas {
+        border: 1px solid red;
+        margin: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <input id="f" type="range" min="1" max="100" value="1" step="1" />
+    </div>
+    <div>
+      <output for="f" id="output_f">1</output>
+    </div>
+    <div><canvas width="1200px" height="480px"></canvas></div>
+
+    <script>
+      var canvas = document.querySelector("canvas"),
+        ctx = canvas.getContext("2d"),
+        cHeight = canvas.height,
+        cWidth = canvas.width,
+        frequency = document.querySelector("#f").value,
+        amplitude = cHeight / 2,
+        x = 0,
+        y = cHeight / 2,
+        point_y = 0;
+
+      window.onload = init;
+
+      function init() {
+        document.querySelector("#f").addEventListener(
+          "input",
+          function () {
+            frequency = this.value;
+            document.querySelector("#output_f").value = frequency;
+          },
+          false
+        );
+
+        // setInterval(() => {
+        //   kx += 1;
+        //   console.log(kx);
+        //   drawSine(kx);
+        // }, 1000);
+        drawSine();
+      }
+      // var col1 = "red";
+      var k = 0;
+      setInterval(() => {
+        k += 0.01;
+      }, 50);
+
+      function drawSine() {
+        ctx.clearRect(0, 0, cWidth, cHeight);
+
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.strokeStyle = "blue";
+        ctx.lineTo(cWidth, y);
+        ctx.stroke();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.strokeStyle = "black";
+
+        for (x = 0; x < cWidth; x++) {
+          point_y = 1.2 * amplitude * Math.sin(k - x * 2 * Math.PI * (frequency / cWidth)) + y;
+          // point_y = point_y > amplitude ? point_y : amplitude;
+          // console.log(point_y, amplitude);
+          // point_y = Math.max(point_y, 2 * amplitude);
+          ctx.lineTo(x, point_y);
+        }
+
+        ctx.stroke();
+        ctx.closePath();
+        requestAnimationFrame(drawSine);
+      }
+    </script>
+  </body>
+</html>

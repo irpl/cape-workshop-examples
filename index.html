@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <!-- <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"
+      integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm"
+      crossorigin="anonymous"
+    /> -->
+    <link rel="stylesheet" href="circle-slider.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        max-width: 100%;
+      }
+      .ctrl-btn {
+        height: 36px;
+        width: 36px;
+        padding: 5px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+      }
+      #yOffset2 {
+        writing-mode: bt-lr;
+        -webkit-appearance: slider-vertical;
+        /* width: 8px;
+                height: 100px; */
+        /* padding: 0 5px; */
+      }
+    </style>
+  </head>
+  <body class="my-0 mx-auto flex flex-col justify-center">
+    <!-- <body class=""> -->
+    <!-- <div class="w-full items-center flex flex-col"> -->
+    <div class="">
+      <!-- <div class=""> -->
+      <div class="flex flex-col items-center py-12">
+        <span class="text-4xl">Simple Sine Wave</span>
+        <div class="relative rounded-lg shadow-lg m-5 p-12 bg-blue-100 w-fit">
+          <div class="absolute top-4 right-4 flex">
+            <div id="drawInvert" class="ctrl-btn rounded-sm shadow-md bg-white px-2 py-1 mx-1 cursor-pointer hover:bg-gray-300">
+              <i class="fa-solid fa-shuffle"></i>
+            </div>
+            <div id="drawPause" class="ctrl-btn rounded-sm shadow-md bg-white px-2 py-1 mx-1 cursor-pointer hover:bg-gray-300">
+              <i class="fas fa-pause"></i>
+            </div>
+          </div>
+          <div class="">
+            <canvas class="absolute" id="canvas" width="1200" height="600"></canvas>
+            <canvas id="canvas-out" width="1200" height="600"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center py-96">
+        <span class="text-4xl">Simple Sine Wave with variable x and y offsets</span>
+        <div class="relative rounded-lg shadow-lg m-5 p-12 bg-blue-100 w-fit">
+          <div class="absolute top-4 right-4 flex">
+            <div id="sephirothPause" class="ctrl-btn rounded-sm shadow-md bg-white px-2 py-1 mx-1 cursor-pointer hover:bg-gray-300">
+              <i class="fas fa-pause"></i>
+            </div>
+          </div>
+
+          <div class="flex">
+            <div class="flex flex-col">
+              <div class="flex">
+                <canvas class="absolute" id="canvas2" width="1200" height="600"></canvas>
+                <canvas id="canvas2-out" width="1200" height="600"></canvas>
+                <div class="flex flex-col justify-center">
+                  <input class="w-10 h-24" id="yOffset2" type="range" min="-50" max="50" value="0" step="1" orient="vertical" />
+                  <!-- <output for="yOffset2" id="output_yOffset2">0</output> -->
+                </div>
+              </div>
+              <div class="flex justify-center mr-11">
+                <input id="xOffset2" type="range" min="-64" max="64" value="0" step="1" />
+                <!-- <output for="xOffset2" id="output_xOffset2">0</output> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center py-96">
+        <span class="text-4xl">Noisy Amplification</span>
+        <div class="relative rounded-lg shadow-lg m-5 p-12 bg-blue-100 w-fit">
+          <div class="absolute top-4 right-4 flex">
+            <div id="noisyNoise" class="ctrl-btn rounded-sm shadow-md bg-white px-2 py-1 mx-1 cursor-pointer hover:bg-gray-300">
+              <!-- <i class="fas fa-bacon"></i> -->
+              <i class="fa-solid fa-tower-broadcast"></i>
+            </div>
+            <div id="noisyPause" class="ctrl-btn rounded-sm shadow-md bg-white px-2 py-1 mx-1 cursor-pointer hover:bg-gray-300">
+              <i class="fas fa-pause"></i>
+            </div>
+          </div>
+
+          <div>
+            <canvas class="absolute" id="canvas3" width="1200" height="600"></canvas>
+            <canvas id="canvas4" width="1200" height="600"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center py-96">
+        <span class="text-4xl">Saturated Output</span>
+        <div class="relative rounded-lg shadow-lg m-5 p-4 bg-blue-100 w-fit">
+          <div class="absolute top-4 right-4 flex">
+            <div id="satPause" class="ctrl-btn rounded-sm shadow-md bg-white px-2 py-1 mx-1 cursor-pointer hover:bg-gray-300">
+              <i class="fas fa-pause"></i>
+            </div>
+          </div>
+          <div class="flex align-center">
+            <div>
+              <canvas id="canvas5" width="1200" height="675"></canvas>
+            </div>
+
+            <div class="h-1/2 m-auto px-16">
+              <input id="satGain" type="range" class="c-rng" min="1" max="100" step="1" value="1" data-range="circular" data-modifier="c-rng--darkcyan" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://kit.fontawesome.com/f0f1d79673.js" crossorigin="anonymous"></script>
+    <script src="circle-slider.js"></script>
+    <script type="text/javascript">
+      window.onload = init;
+
+      var yOff2 = 0;
+      document.querySelector("#yOffset2").addEventListener(
+        "input",
+        function () {
+          // frequency = this.value;
+          // document.querySelector("#output_yOffset2").value = this.value;
+          yOff2 = this.value;
+          console.log(yOff2);
+        },
+        false
+      );
+
+      var xOff2 = 0;
+      document.querySelector("#xOffset2").addEventListener(
+        "input",
+        function () {
+          xOff2 = this.value;
+          console.log(xOff2);
+        },
+        false
+      );
+      document.querySelector("#drawInvert").addEventListener("click", function () {
+        drawInvert = drawInvert * -1;
+      });
+      document.querySelector("#drawPause").addEventListener("click", function () {
+        drawPause = !drawPause;
+      });
+      document.querySelector("#noisyPause").addEventListener("click", function () {
+        noisyPause = !noisyPause;
+      });
+      document.querySelector("#noisyNoise").addEventListener("click", function () {
+        noisyNoise = !noisyNoise;
+      });
+      document.querySelector("#sephirothPause").addEventListener("click", function () {
+        sephirothPause = !sephirothPause;
+      });
+      document.querySelector("#satPause").addEventListener("click", function () {
+        satPause = !satPause;
+      });
+      var satGain = 0;
+
+      // document.getElementById("satGain").addEventListener(
+      //   "input",
+      //   function () {
+      //     satGain = this.value;
+      //     console.log(satGain);
+      //   },
+      //   false
+      // );
+
+      function showAxes(ctx, axes) {
+        var width = ctx.canvas.width;
+        var height = ctx.canvas.height;
+        var xMin = 0;
+
+        ctx.beginPath();
+        ctx.strokeStyle = "rgb(128,128,128)";
+
+        // X-Axis
+        ctx.moveTo(xMin, height / 2);
+        ctx.lineTo(width, height / 2);
+
+        // Y-Axis
+        ctx.moveTo(width / 2, 0);
+        ctx.lineTo(width / 2, height);
+
+        // Starting line
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, height);
+
+        ctx.stroke();
+      }
+      function showVSupply(ctx, axes) {
+        var width = ctx.canvas.width;
+        var height = ctx.canvas.height;
+        var xMin = 0;
+
+        ctx.beginPath();
+        ctx.strokeStyle = "rgb(128,128,128)";
+
+        ctx.font = "24px Arial";
+        // ctx.moveTo(xMin, height / 2 - 98);
+        ctx.fillText("+12v", 0, 140);
+        // ctx.moveTo(xMin, height / 2 + 98);
+        ctx.fillText("-12v", 0, 540);
+
+        // X-Axis
+        ctx.setLineDash([10, 15]);
+        ctx.moveTo(xMin, height / 2 - 200);
+        ctx.lineTo(width, height / 2 - 200);
+
+        ctx.setLineDash([10, 15]);
+        ctx.moveTo(xMin, height / 2 + 200);
+        ctx.lineTo(width, height / 2 + 200);
+        // ctx.font = "10px Arial";
+
+        // // Y-Axis
+        // ctx.moveTo(width / 2, 0);
+        // ctx.lineTo(width / 2, height);
+
+        // // Starting line
+        // ctx.moveTo(0, 0);
+        // ctx.lineTo(0, height);
+
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      function drawPoint(ctx, y) {
+        var radius = 3;
+        ctx.beginPath();
+
+        // Hold x constant at 4 so the point only moves up and down.
+        ctx.arc(4, y, radius, 0, 2 * Math.PI, false);
+
+        ctx.fillStyle = "red";
+        ctx.fill();
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      function plotSine(ctx, xOffset, yOffset, strokeStyle = "rgb(66,44,255)", gain = 1, lineWidth = 3) {
+        var width = ctx.canvas.width;
+        var height = ctx.canvas.height;
+        var scale = 20;
+
+        ctx.beginPath();
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = strokeStyle;
+
+        // console.log("Drawing point...");
+        // drawPoint(ctx, yOffset+step);
+
+        var x = 4;
+        var y = 0;
+        var amplitude = 60;
+        var frequency = 30;
+        //ctx.moveTo(x, y);
+        ctx.moveTo(x, height / 2);
+        while (x < width) {
+          y = height / 2 + yOffset + gain * amplitude * Math.sin((x + xOffset) / frequency);
+          y = Math.min(y, height / 2 + 200);
+          y = Math.max(y, height / 2 - 200);
+          ctx.lineTo(x, y);
+          x++;
+          // console.log("x="+x+" y="+y);
+        }
+        ctx.stroke();
+        ctx.save();
+
+        // console.log("Drawing point at y=" + y);
+        drawPoint(ctx, y);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      var darwStep = 4;
+      var drawPause = false;
+      var drawInvert = 1;
+      function draw() {
+        var canvas = document.getElementById("canvas");
+        var context = canvas.getContext("2d");
+
+        var canvasWidth = parseInt(canvas.offsetWidth);
+        var canvasHeight = parseInt(canvas.offsetHeight);
+
+        context.clearRect(0, 0, canvasWidth, canvasHeight);
+        showAxes(context);
+        context.save();
+
+        var canvas_out = document.getElementById("canvas-out");
+        var context_out = canvas_out.getContext("2d");
+
+        var canvas_outWidth = parseInt(canvas_out.offsetWidth);
+        var canvas_outHeight = parseInt(canvas_out.offsetHeight);
+
+        context_out.clearRect(0, 0, canvas_outWidth, canvas_outHeight);
+        showAxes(context_out);
+        context_out.save();
+
+        plotSine(context, darwStep, 0);
+        plotSine(context_out, darwStep, 0, "red", 3 * drawInvert);
+        context.restore();
+        context_out.restore();
+
+        if (!drawPause) darwStep += 4;
+        window.requestAnimationFrame(draw);
+      }
+
+      var sephirothStep = 4;
+      var sephirothPause = false;
+      function spirograph() {
+        var canvas = document.getElementById("canvas2");
+        var context = canvas.getContext("2d");
+
+        var canvasWidth = parseInt(canvas.offsetWidth);
+        var canvasHeight = parseInt(canvas.offsetHeight);
+
+        context.clearRect(0, 0, canvasWidth, canvasHeight);
+        showAxes(context);
+        context.save();
+
+        var canvas_out = document.getElementById("canvas-out");
+        var context_out = canvas.getContext("2d");
+
+        var canvas_outWidth = parseInt(canvas_out.offsetWidth);
+        var canvas_outHeight = parseInt(canvas_out.offsetHeight);
+
+        context_out.clearRect(0, 0, canvasWidth, canvasHeight);
+        showAxes(context_out);
+        context_out.save();
+
+        // plotSine(context, step, 50);
+        plotSine(context, sephirothStep, 0);
+        context.restore();
+
+        plotSine(context_out, -1 * parseInt(xOff2) + sephirothStep, parseInt(yOff2) * -1, "red", 2.5);
+        context_out.restore();
+
+        window.requestAnimationFrame(spirograph);
+        if (!sephirothPause) sephirothStep += 4;
+      }
+      function getRandomInt(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1) + min);
+      }
+
+      var noisyStep = 4;
+      var noisyPause = false;
+      var noisyNoise = true;
+      function noisy() {
+        var canvas3 = document.getElementById("canvas3");
+        var context3 = canvas3.getContext("2d");
+
+        var canvasWidth3 = parseInt(canvas3.offsetWidth);
+        var canvasHeight3 = parseInt(canvas3.offsetHeight);
+
+        context3.clearRect(0, 0, canvasWidth3, canvasHeight3);
+
+        // context3.clearRect(0, 0, 500, 500);
+        showAxes(context3);
+        context3.save();
+
+        var canvas4 = document.getElementById("canvas4");
+        var context4 = canvas4.getContext("2d");
+
+        var canvasWidth4 = parseInt(canvas4.offsetWidth);
+        var canvasHeight4 = parseInt(canvas4.offsetHeight);
+
+        context4.clearRect(0, 0, canvasWidth4, canvasHeight4);
+        showAxes(context4);
+        context4.save();
+
+        plotSine(context3, noisyStep, 0, "blue");
+        context3.restore();
+
+        var n1 = noisyNoise ? getRandomInt(-10, 10) : 0;
+        var n2 = noisyNoise ? getRandomInt(-10, 10) : 0;
+
+        plotSine(context4, n1 + noisyStep, n2, "red", 2.5, 5);
+        context4.restore();
+
+        window.requestAnimationFrame(noisy);
+        if (!noisyPause) noisyStep += 4;
+      }
+      var clippingStep = 4;
+      var satPause = false;
+      function clipping() {
+        var canvas = document.getElementById("canvas5");
+        var context = canvas.getContext("2d");
+
+        var canvasWidth = parseInt(canvas.offsetWidth);
+        var canvasHeight = parseInt(canvas.offsetHeight);
+
+        context.clearRect(0, 0, canvasWidth, canvasHeight);
+
+        showAxes(context);
+        showVSupply(context);
+        context.save();
+
+        var satGainElement = document.getElementById("satGain");
+        var satGainVal = satGainElement.value;
+        // console.log(satGainVal);
+        plotSine(context, clippingStep, 0, "blue", parseFloat(satGainVal) / 10);
+        context.restore();
+
+        window.requestAnimationFrame(clipping);
+        if (!satPause) clippingStep += 4;
+      }
+      function init() {
+        window.requestAnimationFrame(draw);
+        window.requestAnimationFrame(spirograph);
+        window.requestAnimationFrame(noisy);
+        window.requestAnimationFrame(clipping);
+      }
+
+      var step = -4;
+    </script>
+  </body>
+</html>
