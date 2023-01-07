@@ -108,6 +108,27 @@
       </div>
 
       <div class="flex flex-col items-center py-96">
+        <span class="text-4xl">Atenuation with increased Frequency</span>
+        <div class="relative rounded-lg shadow-lg m-5 p-4 bg-blue-100 w-fit">
+          <div class="absolute top-4 right-4 flex">
+            <div id="attenPause" class="ctrl-btn rounded-sm shadow-md bg-white px-2 py-1 mx-1 cursor-pointer hover:bg-gray-300">
+              <i class="fas fa-pause"></i>
+            </div>
+          </div>
+          <div class="flex align-center">
+            <div>
+              <canvas class="absolute" id="canvas6" width="1200" height="675"></canvas>
+              <canvas id="canvas6-out" width="1200" height="675"></canvas>
+            </div>
+
+            <div class="h-1/2 m-auto px-16">
+              <input id="freqDial" type="range" class="c-rng" min="1" max="100" step="1" value="1" data-range="circular" data-modifier="c-rng--darkcyan" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center py-96">
         <span class="text-4xl">Saturated Output</span>
         <div class="relative rounded-lg shadow-lg m-5 p-4 bg-blue-100 w-fit">
           <div class="absolute top-4 right-4 flex">
@@ -170,6 +191,9 @@
       });
       document.querySelector("#satPause").addEventListener("click", function () {
         satPause = !satPause;
+      });
+      document.querySelector("#attenPause").addEventListener("click", function () {
+        attenPause = !attenPause;
       });
       var satGain = 0;
 
@@ -239,6 +263,51 @@
         ctx.stroke();
         ctx.setLineDash([]);
       }
+      function showOtherScale(ctx, axes) {
+        var width = ctx.canvas.width;
+        var height = ctx.canvas.height;
+        var xMin = 0;
+
+        ctx.beginPath();
+        ctx.strokeStyle = "rgb(128,128,128)";
+
+        ctx.font = "24px Arial";
+        // ctx.moveTo(xMin, height / 2 - 98);
+        // ctx.fillText("+3v", 0, 280);
+        // ctx.moveTo(xMin, height / 2 + 98);
+        // ctx.fillText("-3v", 0, 540);
+
+        // X-Axis
+        ctx.setLineDash([10, 15]);
+        ctx.moveTo(xMin, height / 2 - 200);
+        ctx.lineTo(width, height / 2 - 200);
+
+        ctx.setLineDash([10, 15]);
+        ctx.moveTo(xMin, height / 2 + 200);
+        ctx.lineTo(width, height / 2 + 200);
+
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.setLineDash([10, 15]);
+        ctx.moveTo(xMin, height / 2 - 182);
+        ctx.lineTo(width, height / 2 - 182);
+
+        ctx.setLineDash([10, 15]);
+        ctx.moveTo(xMin, height / 2 + 182);
+        ctx.lineTo(width, height / 2 + 182);
+
+        ctx.setLineDash([10, 15]);
+        ctx.moveTo(xMin, height / 2 - 62);
+        ctx.lineTo(width, height / 2 - 62);
+
+        ctx.setLineDash([10, 15]);
+        ctx.moveTo(xMin, height / 2 + 62);
+        ctx.lineTo(width, height / 2 + 62);
+
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
       function drawPoint(ctx, y) {
         var radius = 3;
         ctx.beginPath();
@@ -251,7 +320,7 @@
         ctx.lineWidth = 1;
         ctx.stroke();
       }
-      function plotSine(ctx, xOffset, yOffset, strokeStyle = "rgb(66,44,255)", gain = 1, lineWidth = 3) {
+      function plotSine(ctx, xOffset, yOffset, strokeStyle = "rgb(66,44,255)", gain = 1, lineWidth = 3, frequency = 30) {
         var width = ctx.canvas.width;
         var height = ctx.canvas.height;
         var scale = 20;
@@ -266,7 +335,6 @@
         var x = 4;
         var y = 0;
         var amplitude = 60;
-        var frequency = 30;
         //ctx.moveTo(x, y);
         ctx.moveTo(x, height / 2);
         while (x < width) {
@@ -420,10 +488,53 @@
         window.requestAnimationFrame(clipping);
         if (!satPause) clippingStep += 4;
       }
+      var attenStep = 4;
+      var attenPause = false;
+      function attenuation() {
+        var canvas = document.getElementById("canvas6");
+        var context = canvas.getContext("2d");
+
+        var canvasWidth = parseInt(canvas.offsetWidth);
+        var canvasHeight = parseInt(canvas.offsetHeight);
+
+        context.clearRect(0, 0, canvasWidth, canvasHeight);
+
+        var canvas_out = document.getElementById("canvas6-out");
+        var context_out = canvas.getContext("2d");
+
+        var canvasWidth_out = parseInt(canvas_out.offsetWidth);
+        var canvasHeight_out = parseInt(canvas_out.offsetHeight);
+
+        context_out.clearRect(0, 0, canvasWidth_out, canvasHeight);
+
+        context_out.save();
+
+        showAxes(context);
+        showVSupply(context);
+        showOtherScale(context);
+        context.save();
+
+        var freqDialElement = document.getElementById("freqDial");
+        var freqDialVal = freqDialElement.value;
+        // console.log(freqDialVal);
+        var freq = 100 - parseInt(freqDialVal);
+        var gain = 3;
+        if (freq < 20) {
+          gain = (3 * freq) / 20;
+          // console.log(gain);
+        }
+        plotSine(context, attenStep, 0, undefined, 1, undefined, freq);
+        plotSine(context_out, attenStep, 0, "red", gain, undefined, freq);
+        context.restore();
+
+        window.requestAnimationFrame(attenuation);
+        if (!attenPause) attenStep += 4;
+      }
       function init() {
         window.requestAnimationFrame(draw);
         window.requestAnimationFrame(spirograph);
         window.requestAnimationFrame(noisy);
+        window.requestAnimationFrame(attenuation);
         window.requestAnimationFrame(clipping);
       }
 
